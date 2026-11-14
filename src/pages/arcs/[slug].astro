@@ -1,0 +1,46 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArcDrawer from '../../components/ArcDrawer.astro';
+import { getArcs } from '../../lib/islands.js';
+import { bearingOf } from '../../stores/navigationStore.js';
+
+export async function getStaticPaths() {
+  const arcs = await getArcs();
+  const link = (entry) => (entry ? { slug: entry.id, title: entry.data.title } : undefined);
+
+  return arcs.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      total: arcs.length,
+      prev: link(arcs[index - 1]),
+      next: link(arcs[index + 1]),
+    },
+  }));
+}
+
+const { entry, total, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const { data } = entry;
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <ArcDrawer
+    slug={entry.id}
+    title={data.title}
+    arcOrder={data.arcOrder}
+    total={total}
+    seaRegion={data.seaRegion}
+    dangerLevel={data.dangerLevel}
+    magneticSignature={data.magneticSignature}
+    summary={data.summary}
+    featuredCharacters={data.featuredCharacters}
+    keyLocations={data.keyLocations}
+    bearing={bearingOf(data.coordinates)}
+    prev={prev}
+    next={next}
+  >
+    <Content />
+  </ArcDrawer>
+</BaseLayout>

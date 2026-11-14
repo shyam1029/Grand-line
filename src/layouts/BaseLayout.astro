@@ -1,0 +1,97 @@
+---
+/**
+ * Application shell.
+ *
+ * The R3F canvas lives here — outside the swapped <main> — and is marked
+ * `transition:persist`, so Astro's ClientRouter moves the very same DOM node
+ * (and therefore the same WebGL context, compiled shaders and geometries)
+ * into every page it navigates to. Only <main> is replaced.
+ */
+import { ClientRouter } from 'astro:transitions';
+import GrandLineCanvas from '../components/canvas/GrandLineCanvas.jsx';
+import { getIslands } from '../lib/islands.js';
+
+import '@fontsource/im-fell-english-sc/400.css';
+import '@fontsource/spectral/400.css';
+import '@fontsource/spectral/400-italic.css';
+import '@fontsource/spectral/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const siteName = 'Log Pose · Grand Line Explorer';
+const {
+  title,
+  description = 'An interactive 3D Log Pose. Point the needle at six islands of the Grand Line and sail the arcs from Reverse Mountain to Wano Country.',
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${siteName}` : siteName;
+const islands = await getIslands();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a2a4a" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <!-- Persistent WebGL layer: survives every client-side navigation. -->
+    <div
+      id="canvas-container"
+      class="fixed inset-0 z-0"
+      transition:persist="grand-line-canvas"
+      transition:animate="none"
+    >
+      <GrandLineCanvas client:only="react" islands={islands} />
+      <div
+        id="boot-veil"
+        class="pointer-events-none absolute inset-0 flex items-end justify-center pb-[18dvh]"
+        aria-hidden="true"
+      >
+        <p class="eyebrow animate-pulse !text-foam text-ink-stroke">Charting the Grand Line…</p>
+      </div>
+    </div>
+
+    <!-- Page content: swapped by the router. Click-through except for its panels. -->
+    <main class="pointer-events-none relative z-10">
+      <slot />
+    </main>
+
+    <script>
+      import { $sceneReady, hoverIsland, selectIsland, slugFromPath } from '../stores/navigationStore.js';
+
+      // URL -> store. Runs at click time (before the new page is fetched) so the
+      // needle swings and the camera departs immediately, and again after every
+      // swap so back/forward and direct loads stay in sync.
+      const syncRoute = (pathname: string) => {
+        hoverIsland(null);
+        selectIsland(slugFromPath(pathname));
+      };
+
+      syncRoute(window.location.pathname);
+      document.addEventListener('astro:before-preparation', (event) => syncRoute(event.to.pathname));
+      document.addEventListener('astro:page-load', () => syncRoute(window.location.pathname));
+
+      // <html> attributes are replaced on swap, so re-apply the ready flag each time.
+      const applyReady = () => {
+        if ($sceneReady.get()) document.documentElement.dataset.scene = 'ready';
+      };
+      $sceneReady.subscribe(applyReady);
+      document.addEventListener('astro:after-swap', applyReady);
+    </script>
+  </body>
+</html>

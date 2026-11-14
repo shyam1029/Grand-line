@@ -1,0 +1,33 @@
+{
+  "name": "grand-line-explorer",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One Piece: Log Pose & Grand Line Archipelago Explorer — an interactive 3D fan experience built with Astro and React Three Fiber.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/tailwind": "^6.0.2",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/im-fell-english-sc": "^5.3.0",
+    "@fontsource/spectral": "^5.3.0",
+    "@nanostores/react": "^2.0.1",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "@react-three/postprocessing": "^3.2.2",
+    "astro": "^5.18.2",
+    "gsap": "^3.15.1",
+    "nanostores": "^1.5.5",
+    "postprocessing": "^6.39.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^3.4.19",
+    "three": "^0.187.0"
+  }
+}

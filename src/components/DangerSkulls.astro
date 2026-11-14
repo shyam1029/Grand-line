@@ -1,0 +1,68 @@
+---
+/**
+ * Danger rating rendered as 1–5 Jolly Rogers.
+ *
+ * With a numeric `level` the icons are rendered statically. With `level`
+ * omitted the component renders five dim icons that a script can light up by
+ * setting `data-level` on the wrapper (used by the live HUD).
+ */
+interface Props {
+  level?: number;
+  size?: number;
+  class?: string;
+  id?: string;
+}
+
+const { level = 0, size = 18, class: className = '', id } = Astro.props;
+---
+
+<span
+  id={id}
+  class:list={['danger-skulls inline-flex items-center gap-1', className]}
+  data-level={level}
+  role="img"
+  aria-label={level ? `Danger level ${level} of 5` : 'Danger level unknown'}
+>
+  {
+    [1, 2, 3, 4, 5].map((rank) => (
+      <svg data-rank={rank} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+          <path d="M3.5 5.5 20.5 20.5" />
+          <path d="M20.5 5.5 3.5 20.5" />
+        </g>
+        <path
+          fill="currentColor"
+          stroke="#050505"
+          stroke-width="1"
+          d="M12 2.5c-4.4 0-7.5 3-7.5 6.9 0 2.5 1.2 4.2 2.9 5.3v2.1c0 .7.5 1.2 1.2 1.2h6.8c.7 0 1.2-.5 1.2-1.2v-2.1c1.7-1.1 2.9-2.8 2.9-5.3 0-3.9-3.1-6.9-7.5-6.9Z"
+        />
+        <g fill="#050505">
+          <ellipse cx="9" cy="9.8" rx="1.8" ry="2.1" />
+          <ellipse cx="15" cy="9.8" rx="1.8" ry="2.1" />
+          <path d="M12 12.4 10.9 14.6h2.2Z" />
+          <path d="M10 16h.9v2H10zM11.6 16h.9v2h-.9zM13.2 16h.9v2h-.9z" />
+        </g>
+      </svg>
+    ))
+  }
+</span>
+
+<style is:global>
+  .danger-skulls svg {
+    color: rgba(243, 231, 204, 0.22);
+    transition: color 0.35s ease, transform 0.35s ease;
+  }
+
+  .danger-skulls[data-level='1'] svg:nth-child(-n + 1),
+  .danger-skulls[data-level='2'] svg:nth-child(-n + 2),
+  .danger-skulls[data-level='3'] svg:nth-child(-n + 3),
+  .danger-skulls[data-level='4'] svg:nth-child(-n + 4),
+  .danger-skulls[data-level='5'] svg:nth-child(-n + 5) {
+    color: var(--parchment);
+  }
+
+  .danger-skulls[data-level='4'] svg:nth-child(-n + 4),
+  .danger-skulls[data-level='5'] svg:nth-child(-n + 5) {
+    color: var(--vermilion);
+  }
+</style>

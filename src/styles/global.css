@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #07121f;
+  --abyss: #0a2a4a;
+  --sea: #1273c4;
+  --lagoon: #3fd0d4;
+  --foam: #f3fbff;
+  --brass: #d4a94a;
+  --brass-light: #f1d58a;
+  --parchment: #f3e7cc;
+  --vermilion: #e0483a;
+
+  --glass-bg: rgba(7, 20, 36, 0.58);
+  --glass-border: rgba(243, 231, 204, 0.2);
+  --hud-gutter: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply font-body text-parchment antialiased;
+    min-height: 100dvh;
+    overflow: hidden;
+    /* Static sky-to-sea gradient: paints instantly and stands in for the scene
+       until the WebGL canvas has hydrated (or if WebGL is unavailable). */
+    background: linear-gradient(
+      180deg,
+      #2f86e0 0%,
+      #8fd3f7 34%,
+      #d8f3ff 44%,
+      #2aa9c9 46%,
+      #1273c4 62%,
+      #0a2a4a 100%
+    );
+  }
+
+  ::selection {
+    background: rgba(212, 169, 74, 0.45);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brass-light);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Glassmorphic instrument panel with an inked border and a brass hairline. */
+  .glass {
+    position: relative;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    box-shadow:
+      0 0 0 2px rgba(5, 5, 5, 0.55),
+      0 18px 50px -18px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    -webkit-backdrop-filter: blur(14px) saturate(1.25);
+    backdrop-filter: blur(14px) saturate(1.25);
+  }
+
+  .glass::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    top: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--brass) 20%, var(--brass-light) 50%, var(--brass) 80%, transparent);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    @apply font-mono text-[0.68rem] uppercase tracking-chart text-brass-light;
+  }
+
+  .hud-button {
+    @apply inline-flex items-center gap-2 rounded-full border border-parchment/25 bg-ink/60 px-3.5 py-2 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-parchment transition-colors duration-200;
+    box-shadow: 0 0 0 2px rgba(5, 5, 5, 0.5);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .hud-button:hover,
+  .hud-button[aria-pressed='true'],
+  .hud-button[aria-expanded='true'] {
+    @apply border-brass bg-brass/20 text-brass-light;
+  }
+
+  .chip {
+    @apply inline-block rounded-full border border-parchment/20 bg-parchment/5 px-2.5 py-1 text-[0.82rem] leading-none text-parchment;
+  }
+
+  /* Lock-status LED */
+  .led {
+    @apply inline-block h-2.5 w-2.5 shrink-0 rounded-full;
+    background: var(--brass);
+    box-shadow: 0 0 10px 1px rgba(241, 213, 138, 0.7);
+    animation: led-pulse 1.4s ease-in-out infinite;
+  }
+
+  [data-lock='locked'] .led {
+    background: var(--lagoon);
+    box-shadow: 0 0 12px 2px rgba(63, 208, 212, 0.85);
+    animation: none;
+  }
+
+  /* MDX lore body */
+  .lore {
+    @apply text-[0.98rem] leading-relaxed text-parchment/90;
+  }
+
+  .lore h2 {
+    @apply mb-2 mt-6 font-display text-xl tracking-wide text-brass-light;
+  }
+
+  .lore h3 {
+    @apply mb-1.5 mt-5 font-mono text-[0.72rem] uppercase tracking-chart text-lagoon;
+  }
+
+  .lore p {
+    @apply mb-3;
+  }
+
+  .lore ul {
+    @apply mb-3 list-none space-y-1.5 pl-0;
+  }
+
+  .lore li {
+    @apply relative pl-5;
+  }
+
+  .lore li::before {
+    content: '';
+    @apply absolute left-0 top-[0.62em] h-1.5 w-1.5 rotate-45 bg-brass;
+  }
+
+  .lore strong {
+    @apply font-semibold text-foam;
+  }
+
+  .lore em {
+    @apply text-brass-light;
+  }
+
+  .lore blockquote {
+    @apply my-4 border-l-2 border-brass pl-4 italic text-parchment/80;
+  }
+
+  /* Floating island labels rendered by drei <Html> inside the canvas layer */
+  .island-label {
+    @apply whitespace-nowrap rounded-full border border-parchment/30 bg-ink/70 px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-parchment/90 transition-all duration-300;
+    box-shadow: 0 0 0 2px rgba(5, 5, 5, 0.55);
+    transform: translateY(0) scale(0.94);
+  }
+
+  .island-label[data-active='true'] {
+    @apply border-brass-light bg-brass text-ink;
+    transform: translateY(-4px) scale(1.06);
+  }
+}
+
+@layer utilities {
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 169, 74, 0.6) transparent;
+  }
+
+  .text-ink-stroke {
+    text-shadow:
+      0 2px 0 rgba(5, 5, 5, 0.85),
+      0 0 24px rgba(7, 18, 31, 0.6);
+  }
+}
+
+/* The canvas owns all gestures inside the scene (drag-to-orbit, pinch). */
+#canvas-container canvas {
+  touch-action: none;
+  outline: none;
+}
+
+/* Boot veil: fades out once the first WebGL frame has been presented. */
+#boot-veil {
+  transition: opacity 0.9s ease 0.15s, visibility 0s linear 1.1s;
+}
+
+html[data-scene='ready'] #boot-veil {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

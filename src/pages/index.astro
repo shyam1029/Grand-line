@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getIslands } from '../lib/islands.js';
+
+const islands = await getIslands();
+---
+
+<BaseLayout>
+  <section
+    class="pointer-events-none fixed inset-x-[var(--hud-gutter)] bottom-[var(--hud-gutter)] max-w-xl lg:bottom-10 lg:left-10"
+  >
+    <p class="eyebrow animate-rise-in text-ink-stroke">Grand Line · Paradise to the New World</p>
+    <h1
+      class="animate-rise-in mt-2 font-display text-[2.6rem] leading-[0.95] text-foam text-ink-stroke [animation-delay:90ms] sm:text-6xl lg:text-7xl"
+    >
+      Follow the needle.
+    </h1>
+    <p
+      class="animate-rise-in mt-3 max-w-md text-[1.02rem] leading-snug text-foam text-ink-stroke [animation-delay:180ms] sm:text-lg"
+    >
+      No compass works on this sea. Hover an island to pull the Log Pose toward it, then select it to set course.
+    </p>
+
+    <!-- Crawlable route list; the 3D beacons and the quick-jump drawer mirror it. -->
+    <ol class="pointer-events-auto animate-rise-in mt-4 flex flex-wrap gap-1.5 [animation-delay:270ms]" aria-label="Islands on the route">
+      {
+        islands.map((island) => (
+          <li>
+            <a href={`/arcs/${island.slug}`} data-island-link={island.slug} class="hud-button !px-3 !py-1.5">
+              <span class="text-brass-light">{String(island.arcOrder).padStart(2, '0')}</span>
+              {island.title}
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="mt-4 hidden font-mono text-[0.6rem] uppercase tracking-[0.14em] text-foam/70 text-ink-stroke sm:block">
+      Unofficial fan project · One Piece © Eiichiro Oda / Shueisha, Toei Animation
+    </p>
+  </section>
+</BaseLayout>

@@ -1,0 +1,128 @@
+---
+/**
+ * Lore drawer for a single island / story arc.
+ * Desktop: a tall glass panel docked to the left edge.
+ * Mobile: a bottom sheet, leaving the upper half of the viewport to the scene.
+ * The camera rig shifts its view offset to keep the island clear of this panel.
+ */
+import DangerSkulls from './DangerSkulls.astro';
+
+interface ArcLink {
+  slug: string;
+  title: string;
+}
+
+interface Props {
+  slug: string;
+  title: string;
+  arcOrder: number;
+  total: number;
+  seaRegion: string;
+  dangerLevel: number;
+  magneticSignature: string;
+  summary: string;
+  featuredCharacters: string[];
+  keyLocations: string[];
+  bearing: number;
+  prev?: ArcLink;
+  next?: ArcLink;
+}
+
+const {
+  slug,
+  title,
+  arcOrder,
+  total,
+  seaRegion,
+  dangerLevel,
+  magneticSignature,
+  summary,
+  featuredCharacters,
+  keyLocations,
+  bearing,
+  prev,
+  next,
+} = Astro.props;
+
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<article
+  id="arc-panel"
+  data-arc-panel={slug}
+  class="glass pointer-events-auto fixed inset-x-[var(--hud-gutter)] bottom-[var(--hud-gutter)] flex max-h-[46dvh] flex-col overflow-hidden lg:inset-x-auto lg:bottom-[var(--hud-gutter)] lg:left-[var(--hud-gutter)] lg:top-[5.25rem] lg:max-h-none lg:w-[26rem]"
+  transition:animate="slide"
+>
+  <header class="shrink-0 border-b border-parchment/15 px-5 pb-4 pt-5">
+    <div class="flex items-center justify-between gap-3">
+      <p class="eyebrow">
+        Arc {pad(arcOrder)} / {pad(total)} · {seaRegion}
+      </p>
+      <a href="/" class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-parchment/70 hover:text-brass-light">
+        ← Chart
+      </a>
+    </div>
+    <h1 class="mt-2 font-display text-[2rem] leading-none text-foam text-ink-stroke sm:text-[2.4rem]">
+      {title}
+    </h1>
+    <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <DangerSkulls level={dangerLevel} />
+      <span class="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-parchment/70">
+        Bearing {String(bearing).padStart(3, '0')}°
+      </span>
+    </div>
+  </header>
+
+  <div class="scroll-thin min-h-0 flex-1 overflow-y-auto px-5 py-4">
+    <p class="text-[1.05rem] italic leading-snug text-parchment">{summary}</p>
+
+    <dl class="mt-4 space-y-3">
+      <div class="rounded-lg border border-lagoon/30 bg-lagoon/10 px-3 py-2.5">
+        <dt class="eyebrow !text-lagoon">Magnetic signature</dt>
+        <dd class="mt-1 text-[0.95rem] leading-snug">{magneticSignature}</dd>
+      </div>
+      <div>
+        <dt class="eyebrow">Featured</dt>
+        <dd class="mt-2 flex flex-wrap gap-1.5">
+          {featuredCharacters.map((name) => <span class="chip">{name}</span>)}
+        </dd>
+      </div>
+      <div>
+        <dt class="eyebrow">Key locations</dt>
+        <dd class="mt-2 flex flex-wrap gap-1.5">
+          {keyLocations.map((place) => <span class="chip">{place}</span>)}
+        </dd>
+      </div>
+    </dl>
+
+    <div class="lore mt-2">
+      <slot />
+    </div>
+  </div>
+
+  <nav
+    class="flex shrink-0 items-stretch justify-between gap-2 border-t border-parchment/15 px-3 py-2.5"
+    aria-label="Adjacent arcs"
+  >
+    {
+      prev ? (
+        <a href={`/arcs/${prev.slug}`} data-island-link={prev.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 hover:bg-parchment/10">
+          <span class="eyebrow block !text-parchment/60">← Previous</span>
+          <span class="block truncate font-display text-lg text-parchment group-hover:text-brass-light">{prev.title}</span>
+        </a>
+      ) : (
+        <span class="flex-1" />
+      )
+    }
+    {
+      next ? (
+        <a href={`/arcs/${next.slug}`} data-island-link={next.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 text-right hover:bg-parchment/10">
+          <span class="eyebrow block !text-parchment/60">Next →</span>
+          <span class="block truncate font-display text-lg text-parchment group-hover:text-brass-light">{next.title}</span>
+        </a>
+      ) : (
+        <span class="flex-1" />
+      )
+    }
+  </nav>
+</article>
