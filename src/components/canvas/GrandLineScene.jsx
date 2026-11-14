@@ -1,13 +1,18 @@
 /**
- * Scene graph shell: lighting, atmosphere, the Log Pose, the archipelago and
- * the camera rig. Also owns scene-wide side effects (input listeners and
- * disposal of the shared material kit).
+ * Scene graph: lighting, sky, ocean, the Log Pose, the archipelago, ambient
+ * props, the camera rig and the post-processing chain. Also owns scene-wide
+ * side effects (input listeners and disposal of the shared material kit).
  */
 import { useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
+import { Preload } from '@react-three/drei';
+import { AmbientProps } from './AmbientProps.jsx';
 import { ArchipelagoNodes } from './ArchipelagoNodes.jsx';
 import { CameraRig } from './CameraRig.jsx';
 import { LogPoseModel } from './LogPoseModel.jsx';
+import { OceanSurface } from './OceanSurface.jsx';
+import { PostProcessingEffects } from './PostProcessingEffects.jsx';
+import { SkyDome } from './SkyDome.jsx';
 import { disposeToonKit } from './ToonMaterials.jsx';
 import { SCENE } from './sceneConfig.js';
 import { attachInput } from '../../lib/input.js';
@@ -27,9 +32,17 @@ export function GrandLineScene({ islands }) {
       <hemisphereLight args={['#bfe6ff', '#2a6f9c', SCENE.hemisphereIntensity]} />
       <directionalLight position={SCENE.sunPosition} intensity={SCENE.sunIntensity} color="#ffffff" />
 
+      <SkyDome />
+      <OceanSurface islands={islands} />
+      <AmbientProps islands={islands} />
+
       <CameraRig islands={islands} />
       <LogPoseModel islands={islands} />
       <ArchipelagoNodes islands={islands} />
+
+      <PostProcessingEffects />
+      {/* Compile every shader up front so the first camera flight never hitches. */}
+      <Preload all />
     </>
   );
 }
