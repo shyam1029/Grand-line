@@ -136,10 +136,20 @@
     backdrop-filter: blur(10px);
   }
 
-  .hud-button:hover,
+  .hud-button:hover {
+    @apply border-brass-light text-brass-light;
+  }
+
+  /* Solid fill when active: stays readable over bright cloud or dark sea alike. */
   .hud-button[aria-pressed='true'],
-  .hud-button[aria-expanded='true'] {
-    @apply border-brass bg-brass/20 text-brass-light;
+  .hud-button[aria-expanded='true'],
+  .hud-button[aria-current='page'] {
+    @apply border-brass-light bg-brass text-ink;
+  }
+
+  /* Denser glass for panels that carry dense text over the 3D labels. */
+  .glass-solid {
+    --glass-bg: rgba(7, 20, 36, 0.88);
   }
 
   .chip {

@@ -6,6 +6,13 @@ const islands = await getIslands();
 ---
 
 <BaseLayout>
+  <!-- Soft scrim so the headline stays legible over a busy sea. -->
+  <div
+    class="pointer-events-none fixed bottom-0 left-0 h-[60dvh] w-full max-w-4xl bg-[radial-gradient(ellipse_at_bottom_left,rgba(7,18,31,0.62),transparent_68%)]"
+    aria-hidden="true"
+  >
+  </div>
+
   <section
     class="pointer-events-none fixed inset-x-[var(--hud-gutter)] bottom-[var(--hud-gutter)] max-w-xl lg:bottom-10 lg:left-10"
   >
@@ -18,11 +25,13 @@ const islands = await getIslands();
     <p
       class="animate-rise-in mt-3 max-w-md text-[1.02rem] leading-snug text-foam text-ink-stroke [animation-delay:180ms] sm:text-lg"
     >
-      No compass works on this sea. Hover an island to pull the Log Pose toward it, then select it to set course.
+      No compass works on this sea.{' '}
+      <span class="pointer-coarse:hidden">Hover an island to pull the Log Pose toward it, then select it to set course.</span>
+      <span class="pointer-fine:hidden">Tap an island to lock the Log Pose and set course. Drag to look around.</span>
     </p>
 
     <!-- Crawlable route list; the 3D beacons and the quick-jump drawer mirror it. -->
-    <ol class="pointer-events-auto animate-rise-in mt-4 flex flex-wrap gap-1.5 [animation-delay:270ms]" aria-label="Islands on the route">
+    <ol class="pointer-events-auto animate-rise-in mt-4 hidden flex-wrap gap-1.5 [animation-delay:270ms] sm:flex" aria-label="Islands on the route">
       {
         islands.map((island) => (
           <li>

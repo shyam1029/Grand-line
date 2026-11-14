@@ -1,0 +1,144 @@
+---
+/**
+ * Nautical HUD overlay.
+ *
+ * Static HTML rendered once at build time and marked `transition:persist`, so
+ * it lives alongside the canvas for the whole visit. A small script
+ * subscribes to the Nano Stores and patches text / attributes in place — no
+ * framework runtime, no re-renders.
+ */
+import DangerSkulls from './DangerSkulls.astro';
+import NavigationControls from './NavigationControls.astro';
+
+interface Island {
+  slug: string;
+  title: string;
+  arcOrder: number;
+  seaRegion: string;
+  coordinates: { x: number; y: number; z: number };
+  magneticSignature: string;
+  dangerLevel: number;
+}
+
+interface Props {
+  islands: Island[];
+}
+
+const { islands } = Astro.props;
+---
+
+<div id="hud" class="pointer-events-none fixed inset-0 z-20" transition:persist="hud" transition:animate="none">
+  <header class="absolute inset-x-[var(--hud-gutter)] top-[var(--hud-gutter)] flex items-center justify-between gap-3">
+    <a href="/" class="pointer-events-auto flex items-center gap-2.5 text-ink-stroke" aria-label="Log Pose — back to the chart">
+      <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="29" fill="#0a2a4a" stroke="#050505" stroke-width="3"></circle>
+        <circle cx="32" cy="32" r="21" fill="#bfeeff" fill-opacity=".35" stroke="#d4a94a" stroke-width="5"></circle>
+        <path d="M32 13 37 32H27Z" fill="#e0483a" stroke="#050505" stroke-width="2" stroke-linejoin="round"></path>
+        <path d="M32 51 27 32h10Z" fill="#5d7fa3" stroke="#050505" stroke-width="2" stroke-linejoin="round"></path>
+        <circle cx="32" cy="32" r="3.5" fill="#f1d58a" stroke="#050505" stroke-width="2"></circle>
+      </svg>
+      <span class="leading-none">
+        <span class="block font-display text-xl text-foam">Log Pose</span>
+        <span class="eyebrow mt-0.5 hidden sm:block">Grand Line Explorer</span>
+      </span>
+    </a>
+
+    <NavigationControls islands={islands} />
+  </header>
+
+  <!-- Magnetic lock status -->
+  <section
+    id="hud-status"
+    data-lock="recording"
+    aria-live="polite"
+    aria-label="Log Pose status"
+    class="glass pointer-events-auto absolute inset-x-[var(--hud-gutter)] top-[4.75rem] px-4 py-3 max-lg:[--glass-bg:rgba(7,20,36,0.86)] lg:inset-x-auto lg:bottom-[var(--hud-gutter)] lg:right-[var(--hud-gutter)] lg:top-auto lg:w-80 lg:py-4"
+  >
+    <div class="flex items-center justify-between gap-3">
+      <p class="flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-parchment">
+        <span class="led"></span>
+        <span id="hud-status-text">Recording Log…</span>
+      </p>
+      <DangerSkulls id="hud-danger" size={16} />
+    </div>
+
+    <p id="hud-target" class="mt-1.5 truncate font-display text-2xl leading-tight text-foam">Needle adrift</p>
+
+    <dl class="mt-3 hidden grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 border-t border-parchment/15 pt-3 text-sm lg:grid">
+      <dt class="eyebrow self-center">Bearing</dt>
+      <dd id="hud-bearing" class="font-mono text-parchment">———</dd>
+      <dt class="eyebrow self-center">Sea</dt>
+      <dd id="hud-region" class="text-parchment">Uncharted</dd>
+      <dt class="eyebrow self-start pt-0.5">Field</dt>
+      <dd id="hud-signature" class="leading-snug text-parchment/85">
+        Hover an island to pull the needle toward it.
+      </dd>
+    </dl>
+  </section>
+
+  <script type="application/json" id="island-data" set:html={JSON.stringify(islands)} />
+</div>
+
+<script>
+  import { $activeTarget, $lockStatus, bearingOf, hoverIsland } from '../stores/navigationStore.js';
+
+  type IslandRecord = {
+    slug: string;
+    title: string;
+    seaRegion: string;
+    coordinates: { x: number; y: number; z: number };
+    magneticSignature: string;
+    dangerLevel: number;
+  };
+
+  const records: IslandRecord[] = JSON.parse(document.getElementById('island-data')!.textContent ?? '[]');
+  const bySlug = new Map(records.map((island) => [island.slug, island]));
+
+  const panel = document.getElementById('hud-status')!;
+  const statusText = document.getElementById('hud-status-text')!;
+  const target = document.getElementById('hud-target')!;
+  const danger = document.getElementById('hud-danger')!;
+  const bearing = document.getElementById('hud-bearing')!;
+  const region = document.getElementById('hud-region')!;
+  const signature = document.getElementById('hud-signature')!;
+
+  const render = () => {
+    const island = bySlug.get($activeTarget.get() ?? '');
+    const status = $lockStatus.get();
+
+    panel.dataset.lock = status;
+    statusText.textContent = status === 'locked' ? 'Log Locked' : 'Recording Log…';
+
+    target.textContent = island ? island.title : 'Needle adrift';
+    danger.dataset.level = String(island?.dangerLevel ?? 0);
+    danger.setAttribute('aria-label', island ? `Danger level ${island.dangerLevel} of 5` : 'Danger level unknown');
+    bearing.textContent = island ? `${String(bearingOf(island.coordinates)).padStart(3, '0')}°` : '———';
+    region.textContent = island ? island.seaRegion : 'Uncharted';
+    signature.textContent = island ? island.magneticSignature : 'Hover an island to pull the needle toward it.';
+  };
+
+  $activeTarget.subscribe(render);
+  $lockStatus.listen(render);
+
+  // Any link to an island — drawer, home route list, prev/next — previews its
+  // bearing on hover or keyboard focus, exactly like hovering the 3D beacon.
+  // Delegated on document so it also covers content swapped in by the router.
+  const linkedSlug = (event: Event) =>
+    (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-island-link]')?.dataset.islandLink ?? null;
+
+  document.addEventListener('pointerover', (event) => {
+    if (event.pointerType !== 'mouse') return;
+    const slug = linkedSlug(event);
+    if (slug) hoverIsland(slug);
+  });
+  document.addEventListener('pointerout', (event) => {
+    if (linkedSlug(event)) hoverIsland(null);
+  });
+  document.addEventListener('focusin', (event) => {
+    const slug = linkedSlug(event);
+    if (slug) hoverIsland(slug);
+  });
+  document.addEventListener('focusout', (event) => {
+    if (linkedSlug(event)) hoverIsland(null);
+  });
+</script>

@@ -9,6 +9,7 @@
  */
 import { ClientRouter } from 'astro:transitions';
 import GrandLineCanvas from '../components/canvas/GrandLineCanvas.jsx';
+import IslandHUD from '../components/IslandHUD.astro';
 import { getIslands } from '../lib/islands.js';
 
 import '@fontsource/im-fell-english-sc/400.css';
@@ -65,6 +66,9 @@ const islands = await getIslands();
         <p class="eyebrow animate-pulse text-foam! text-ink-stroke">Charting the Grand Line…</p>
       </div>
     </div>
+
+    <!-- Persistent HUD: store-driven, so it never needs re-rendering. -->
+    <IslandHUD islands={islands} />
 
     <!-- Page content: swapped by the router. Click-through except for its panels. -->
     <main class="pointer-events-none relative z-10">

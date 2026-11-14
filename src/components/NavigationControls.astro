@@ -1,0 +1,191 @@
+---
+/**
+ * Scene controls and the quick-jump island drawer.
+ *
+ * Rendered inside the persistent HUD, so its DOM and listeners are created
+ * once and survive every view transition. All behaviour goes through Nano
+ * Stores; the 3D scene never hears about these buttons directly.
+ */
+import DangerSkulls from './DangerSkulls.astro';
+
+interface Island {
+  slug: string;
+  title: string;
+  arcOrder: number;
+  seaRegion: string;
+  dangerLevel: number;
+}
+
+interface Props {
+  islands: Island[];
+}
+
+const { islands } = Astro.props;
+---
+
+<nav class="pointer-events-auto flex items-center gap-1.5 sm:gap-2" aria-label="Scene controls">
+  <button id="btn-gyro" type="button" class="hud-button" aria-pressed="false" aria-label="Steer with device tilt" hidden>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect>
+      <path d="M2.5 9c-1 2-1 4 0 6M21.5 9c1 2 1 4 0 6"></path>
+    </svg>
+    <span class="hidden md:inline">Tilt</span>
+  </button>
+
+  <button id="btn-sound" type="button" class="hud-button" aria-pressed="false" aria-label="Toggle sound">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5Z" fill="currentColor"></path>
+      <path data-sound-on d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" hidden></path>
+      <path data-sound-off d="m16 9.5 5 5m0-5-5 5"></path>
+    </svg>
+    <span class="hidden md:inline" data-label>Sound off</span>
+  </button>
+
+  <button id="btn-explore" type="button" class="hud-button" aria-pressed="false" aria-label="Explore free">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.5"></circle>
+      <path d="m15.5 8.5-2 5-5 2 2-5Z" fill="currentColor"></path>
+    </svg>
+    <span class="hidden md:inline" data-label>Explore free</span>
+  </button>
+
+  <button id="btn-drawer" type="button" class="hud-button" aria-expanded="false" aria-controls="island-drawer">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M4 6h16M4 12h16M4 18h10"></path>
+    </svg>
+    <span>Islands</span>
+  </button>
+</nav>
+
+<aside
+  id="island-drawer"
+  data-open="false"
+  inert
+  aria-label="Quick-jump island selector"
+  class="glass glass-solid scroll-thin pointer-events-auto fixed right-[var(--hud-gutter)] top-[4.75rem] max-h-[calc(100dvh-6rem)] w-[min(22rem,calc(100vw-2*var(--hud-gutter)))] translate-x-[calc(100%+3rem)] overflow-y-auto p-2 opacity-0 transition-[translate,opacity] duration-300 ease-out data-[open=true]:translate-x-0 data-[open=true]:opacity-100"
+>
+  <p class="eyebrow px-3 pb-1 pt-2.5">Log route · {islands.length} islands</p>
+  <ol>
+    {
+      islands.map((island) => (
+        <li>
+          <a
+            href={`/arcs/${island.slug}`}
+            data-island-link={island.slug}
+            data-drawer-link
+            class="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-parchment/10 aria-[current=page]:bg-brass/20"
+          >
+            <span class="font-mono text-xs text-brass-light">{String(island.arcOrder).padStart(2, '0')}</span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-display text-lg leading-tight text-parchment group-hover:text-brass-light">
+                {island.title}
+              </span>
+              <span class="block font-mono text-[0.6rem] uppercase tracking-[0.16em] text-parchment/55">
+                {island.seaRegion}
+              </span>
+            </span>
+            <DangerSkulls level={island.dangerLevel} size={13} />
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</aside>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+  import {
+    $freeExplore,
+    $gyroEnabled,
+    $selectedIsland,
+    $soundEnabled,
+    resetCamera,
+    setFreeExplore,
+    setGyroEnabled,
+    setSoundEnabled,
+  } from '../stores/navigationStore.js';
+  import { disableGyro, enableGyro, isGyroSupported } from '../lib/input.js';
+  import { initAudio } from '../lib/audio.js';
+
+  const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const label = (button: HTMLElement) => button.querySelector<HTMLElement>('[data-label]');
+
+  /* ------------------------------ sound ------------------------------ */
+  const soundButton = byId<HTMLButtonElement>('btn-sound');
+  initAudio();
+  soundButton.addEventListener('click', () => setSoundEnabled(!$soundEnabled.get()));
+  $soundEnabled.subscribe((enabled) => {
+    soundButton.setAttribute('aria-pressed', String(enabled));
+    soundButton.querySelector('[data-sound-on]')?.toggleAttribute('hidden', !enabled);
+    soundButton.querySelector('[data-sound-off]')?.toggleAttribute('hidden', enabled);
+    const text = label(soundButton);
+    if (text) text.textContent = enabled ? 'Sound on' : 'Sound off';
+  });
+
+  /* ------------------- explore free / reset camera ------------------- */
+  const exploreButton = byId<HTMLButtonElement>('btn-explore');
+  exploreButton.addEventListener('click', () => {
+    if ($freeExplore.get()) {
+      resetCamera();
+      return;
+    }
+    setFreeExplore(true);
+    // Free exploration belongs to the chart view: leave any open arc page.
+    if (window.location.pathname !== '/') navigate('/');
+  });
+  $freeExplore.subscribe((free) => {
+    const text = free ? 'Reset camera' : 'Explore free';
+    exploreButton.setAttribute('aria-pressed', String(free));
+    exploreButton.setAttribute('aria-label', text);
+    const span = label(exploreButton);
+    if (span) span.textContent = text;
+  });
+
+  /* ------------------------------ gyro ------------------------------- */
+  const gyroButton = byId<HTMLButtonElement>('btn-gyro');
+  if (isGyroSupported()) {
+    gyroButton.hidden = false;
+    gyroButton.addEventListener('click', async () => {
+      if ($gyroEnabled.get()) {
+        disableGyro();
+        setGyroEnabled(false);
+      } else {
+        setGyroEnabled(await enableGyro());
+      }
+    });
+    $gyroEnabled.subscribe((enabled) => gyroButton.setAttribute('aria-pressed', String(enabled)));
+  }
+
+  /* ----------------------------- drawer ------------------------------ */
+  const drawer = byId<HTMLElement>('island-drawer');
+  const drawerButton = byId<HTMLButtonElement>('btn-drawer');
+
+  const setDrawer = (open: boolean) => {
+    drawer.dataset.open = String(open);
+    drawer.toggleAttribute('inert', !open);
+    drawerButton.setAttribute('aria-expanded', String(open));
+  };
+  const isOpen = () => drawer.dataset.open === 'true';
+
+  drawerButton.addEventListener('click', () => setDrawer(!isOpen()));
+  drawer.addEventListener('click', (event) => {
+    if ((event.target as HTMLElement).closest('[data-drawer-link]')) setDrawer(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isOpen()) {
+      setDrawer(false);
+      drawerButton.focus();
+    }
+  });
+  document.addEventListener('pointerdown', (event) => {
+    const target = event.target as Node;
+    if (isOpen() && !drawer.contains(target) && !drawerButton.contains(target)) setDrawer(false);
+  });
+
+  $selectedIsland.subscribe((slug) => {
+    drawer.querySelectorAll<HTMLAnchorElement>('[data-drawer-link]').forEach((link) => {
+      if (link.dataset.islandLink === slug) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  });
+</script>
