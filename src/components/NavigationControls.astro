@@ -7,6 +7,7 @@
  * Stores; the 3D scene never hears about these buttons directly.
  */
 import DangerSkulls from './DangerSkulls.astro';
+import { arcPath } from '../stores/navigationStore.js';
 
 interface Island {
   slug: string;
@@ -70,7 +71,7 @@ const { islands } = Astro.props;
       islands.map((island) => (
         <li>
           <a
-            href={`/arcs/${island.slug}`}
+            href={arcPath(island.slug)}
             data-island-link={island.slug}
             data-drawer-link
             class="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-parchment/10 aria-[current=page]:bg-brass/20"
@@ -99,10 +100,12 @@ const { islands } = Astro.props;
     $gyroEnabled,
     $selectedIsland,
     $soundEnabled,
+    homePath,
     resetCamera,
     setFreeExplore,
     setGyroEnabled,
     setSoundEnabled,
+    slugFromPath,
   } from '../stores/navigationStore.js';
   import { disableGyro, enableGyro, isGyroSupported } from '../lib/input.js';
   import { initAudio } from '../lib/audio.js';
@@ -131,7 +134,7 @@ const { islands } = Astro.props;
     }
     setFreeExplore(true);
     // Free exploration belongs to the chart view: leave any open arc page.
-    if (window.location.pathname !== '/') navigate('/');
+    if (slugFromPath(window.location.pathname) !== null) navigate(homePath());
   });
   $freeExplore.subscribe((free) => {
     const text = free ? 'Reset camera' : 'Explore free';

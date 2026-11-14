@@ -20,6 +20,18 @@ npm run build      # static site in dist/
 npm run preview    # serve the production build
 ```
 
+## Deployment (GitHub Pages)
+
+`.github/workflows/deploy.yml` builds and publishes the site on every push to `main` (or manually from the Actions tab).
+
+One-time setup: in the repository, open **Settings → Pages** and set **Source** to **GitHub Actions**.
+
+The workflow asks Pages for the site's origin and base path and passes them to the build as `SITE_URL` and `BASE_PATH`, so a project site (`/<repo>/`) and a custom domain both work without code changes. All internal URLs go through `homePath()` / `arcPath()` / `withBase()` in `src/stores/navigationStore.js`. To reproduce a sub-path build locally:
+
+```bash
+SITE_URL=https://<user>.github.io BASE_PATH=/<repo> npm run build
+```
+
 ## How it fits together
 
 ```

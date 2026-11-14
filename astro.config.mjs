@@ -6,6 +6,14 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   integrations: [react(), mdx()],
+  // Deploy target. Both are injected by the GitHub Pages workflow (which asks
+  // Pages for the real origin and base path, so custom domains work too);
+  // locally they are unset and the site is served from the root.
+  site: process.env.SITE_URL || undefined,
+  base: process.env.BASE_PATH || '/',
+  // Static hosts serve /arcs/alabasta/index.html at the trailing-slash URL;
+  // linking to it directly avoids a redirect on every navigation.
+  trailingSlash: 'always',
   output: 'static',
   // The dev toolbar overlaps the HUD and intercepts pointer events over the scene.
   devToolbar: { enabled: false },

@@ -6,6 +6,7 @@
  * The camera rig shifts its view offset to keep the island clear of this panel.
  */
 import DangerSkulls from './DangerSkulls.astro';
+import { arcPath, homePath } from '../stores/navigationStore.js';
 
 interface ArcLink {
   slug: string;
@@ -58,7 +59,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <p class="eyebrow">
         Arc {pad(arcOrder)} / {pad(total)} · {seaRegion}
       </p>
-      <a href="/" class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-parchment/70 hover:text-brass-light">
+      <a href={homePath()} class="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-parchment/70 hover:text-brass-light">
         ← Chart
       </a>
     </div>
@@ -106,7 +107,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   >
     {
       prev ? (
-        <a href={`/arcs/${prev.slug}`} data-island-link={prev.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 hover:bg-parchment/10">
+        <a href={arcPath(prev.slug)} data-island-link={prev.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 hover:bg-parchment/10">
           <span class="eyebrow block text-parchment/60!">← Previous</span>
           <span class="block truncate font-display text-lg text-parchment group-hover:text-brass-light">{prev.title}</span>
         </a>
@@ -116,7 +117,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     }
     {
       next ? (
-        <a href={`/arcs/${next.slug}`} data-island-link={next.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 text-right hover:bg-parchment/10">
+        <a href={arcPath(next.slug)} data-island-link={next.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 text-right hover:bg-parchment/10">
           <span class="eyebrow block text-parchment/60!">Next →</span>
           <span class="block truncate font-display text-lg text-parchment group-hover:text-brass-light">{next.title}</span>
         </a>

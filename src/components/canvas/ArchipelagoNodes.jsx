@@ -14,7 +14,7 @@ import * as THREE from 'three';
 import { Inked, createToonMaterial, outlineMaterial, toonMaterial, vertexToonMaterial } from './ToonMaterials.jsx';
 import { buildIsland, disposeIslandPrimitives } from './islandBlueprints.js';
 import { MAX_DELTA } from './sceneConfig.js';
-import { $activeTarget, $hoveredIsland, $selectedIsland, hoverIsland, selectIsland } from '../../stores/navigationStore.js';
+import { $activeTarget, $hoveredIsland, $selectedIsland, arcPath, hoverIsland, selectIsland } from '../../stores/navigationStore.js';
 
 const { damp } = THREE.MathUtils;
 const noRaycast = () => null;
@@ -147,7 +147,7 @@ function IslandNode({ island, index, shared, portal }) {
     // Update the store first so the needle and camera react this frame,
     // then let Astro swap the page content in with a view transition.
     selectIsland(slug);
-    navigate(`/arcs/${slug}`);
+    navigate(arcPath(slug));
   };
 
   return (

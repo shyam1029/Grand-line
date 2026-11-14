@@ -9,6 +9,7 @@
  */
 import DangerSkulls from './DangerSkulls.astro';
 import NavigationControls from './NavigationControls.astro';
+import { homePath } from '../stores/navigationStore.js';
 
 interface Island {
   slug: string;
@@ -29,7 +30,7 @@ const { islands } = Astro.props;
 
 <div id="hud" class="pointer-events-none fixed inset-0 z-20" transition:persist="hud" transition:animate="none">
   <header class="absolute inset-x-[var(--hud-gutter)] top-[var(--hud-gutter)] flex items-center justify-between gap-3">
-    <a href="/" class="pointer-events-auto flex items-center gap-2.5 text-ink-stroke" aria-label="Log Pose — back to the chart">
+    <a href={homePath()} class="pointer-events-auto flex items-center gap-2.5 text-ink-stroke" aria-label="Log Pose — back to the chart">
       <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
         <circle cx="32" cy="32" r="29" fill="#0a2a4a" stroke="#050505" stroke-width="3"></circle>
         <circle cx="32" cy="32" r="21" fill="#bfeeff" fill-opacity=".35" stroke="#d4a94a" stroke-width="5"></circle>

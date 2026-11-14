@@ -88,9 +88,30 @@ export function markSceneReady() {
 
 /* ------------------------------- helpers ------------------------------- */
 
-/** `/arcs/alabasta/` -> `alabasta`; anything else -> null. */
+/**
+ * The site may be served from a sub-path (GitHub Pages project sites live at
+ * `/<repo>/`). Astro exposes it as BASE_URL; every internal URL is built and
+ * parsed through these helpers so nothing assumes the domain root.
+ */
+const BASE = import.meta.env.BASE_URL.replace(/\/+$/, '');
+
+/** Prefix a root-relative path (`/favicon.svg`) with the deploy base. */
+export function withBase(path) {
+  return `${BASE}${path}`;
+}
+
+export function homePath() {
+  return `${BASE}/`;
+}
+
+export function arcPath(slug) {
+  return `${BASE}/arcs/${slug}/`;
+}
+
+/** `<base>/arcs/alabasta/` -> `alabasta`; anything else -> null. */
 export function slugFromPath(pathname) {
-  return pathname.match(/^\/arcs\/([^/]+)\/?$/)?.[1] ?? null;
+  const local = BASE && pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
+  return local.match(/^\/arcs\/([^/]+)\/?$/)?.[1] ?? null;
 }
 
 /** Compass bearing (0–359°) of a point seen from the Log Pose; -Z is "north". */

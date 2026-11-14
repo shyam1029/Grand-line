@@ -11,6 +11,7 @@ import { ClientRouter } from 'astro:transitions';
 import GrandLineCanvas from '../components/canvas/GrandLineCanvas.jsx';
 import IslandHUD from '../components/IslandHUD.astro';
 import { getIslands } from '../lib/islands.js';
+import { withBase } from '../stores/navigationStore.js';
 
 import '@fontsource/im-fell-english-sc/400.css';
 import '@fontsource/spectral/400.css';
@@ -45,7 +46,7 @@ const islands = await getIslands();
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <title>{pageTitle}</title>
     <ClientRouter />
   </head>
