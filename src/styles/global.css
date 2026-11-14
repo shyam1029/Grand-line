@@ -1,6 +1,51 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Design tokens (Tailwind CSS 4 theme). Each variable also generates its
+   utilities: --color-brass -> bg-brass / text-brass / border-brass, etc. */
+@theme {
+  --color-ink: #07121f;
+  --color-abyss: #0a2a4a;
+  --color-sea: #1273c4;
+  --color-lagoon: #3fd0d4;
+  --color-foam: #f3fbff;
+  --color-brass: #d4a94a;
+  --color-brass-light: #f1d58a;
+  --color-brass-dark: #8a6a2a;
+  --color-parchment: #f3e7cc;
+  --color-vermilion: #e0483a;
+
+  --font-display: 'IM Fell English SC', Georgia, serif;
+  --font-body: Spectral, Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --tracking-chart: 0.22em;
+
+  --animate-led-pulse: led-pulse 1.4s ease-in-out infinite;
+  --animate-rise-in: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes led-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 :root {
   --ink: #07121f;
@@ -170,17 +215,15 @@
   }
 }
 
-@layer utilities {
-  .scroll-thin {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(212, 169, 74, 0.6) transparent;
-  }
+@utility scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 169, 74, 0.6) transparent;
+}
 
-  .text-ink-stroke {
-    text-shadow:
-      0 2px 0 rgba(5, 5, 5, 0.85),
-      0 0 24px rgba(7, 18, 31, 0.6);
-  }
+@utility text-ink-stroke {
+  text-shadow:
+    0 2px 0 rgba(5, 5, 5, 0.85),
+    0 0 24px rgba(7, 18, 31, 0.6);
 }
 
 /* The canvas owns all gestures inside the scene (drag-to-orbit, pinch). */

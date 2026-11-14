@@ -1,16 +1,11 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [
-    // Base styles are imported explicitly from src/styles/global.css.
-    tailwind({ applyBaseStyles: false }),
-    react(),
-    mdx(),
-  ],
+  integrations: [react(), mdx()],
   output: 'static',
   // The dev toolbar overlaps the HUD and intercepts pointer events over the scene.
   devToolbar: { enabled: false },
@@ -24,6 +19,8 @@ export default defineConfig({
     defaultStrategy: 'hover',
   },
   vite: {
+    // Tailwind CSS 4 runs as a Vite plugin; its theme lives in src/styles/global.css.
+    plugins: [tailwindcss()],
     assetsInclude: ['**/*.glb', '**/*.ktx2'],
     optimizeDeps: {
       // Pre-bundle the whole 3D stack in one pass so the first dev-server load

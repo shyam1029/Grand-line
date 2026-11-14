@@ -78,7 +78,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     <dl class="mt-4 space-y-3">
       <div class="rounded-lg border border-lagoon/30 bg-lagoon/10 px-3 py-2.5">
-        <dt class="eyebrow !text-lagoon">Magnetic signature</dt>
+        <dt class="eyebrow text-lagoon!">Magnetic signature</dt>
         <dd class="mt-1 text-[0.95rem] leading-snug">{magneticSignature}</dd>
       </div>
       <div>
@@ -107,7 +107,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     {
       prev ? (
         <a href={`/arcs/${prev.slug}`} data-island-link={prev.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 hover:bg-parchment/10">
-          <span class="eyebrow block !text-parchment/60">← Previous</span>
+          <span class="eyebrow block text-parchment/60!">← Previous</span>
           <span class="block truncate font-display text-lg text-parchment group-hover:text-brass-light">{prev.title}</span>
         </a>
       ) : (
@@ -117,7 +117,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     {
       next ? (
         <a href={`/arcs/${next.slug}`} data-island-link={next.slug} class="group min-w-0 flex-1 rounded-lg px-2 py-1.5 text-right hover:bg-parchment/10">
-          <span class="eyebrow block !text-parchment/60">Next →</span>
+          <span class="eyebrow block text-parchment/60!">Next →</span>
           <span class="block truncate font-display text-lg text-parchment group-hover:text-brass-light">{next.title}</span>
         </a>
       ) : (

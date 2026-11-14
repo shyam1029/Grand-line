@@ -26,7 +26,7 @@ const islands = await getIslands();
       {
         islands.map((island) => (
           <li>
-            <a href={`/arcs/${island.slug}`} data-island-link={island.slug} class="hud-button !px-3 !py-1.5">
+            <a href={`/arcs/${island.slug}`} data-island-link={island.slug} class="hud-button px-3! py-1.5!">
               <span class="text-brass-light">{String(island.arcOrder).padStart(2, '0')}</span>
               {island.title}
             </a>
