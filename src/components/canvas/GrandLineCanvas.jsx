@@ -11,7 +11,7 @@ import { GrandLineScene } from './GrandLineScene.jsx';
 import { markSceneReady } from '../../stores/navigationStore.js';
 
 const CANVAS_STYLE = { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' };
-const CAMERA = { position: [0, 6.2, 11.5], fov: 45, near: 0.1, far: 500 };
+const CAMERA = { position: [0, 8.4, 12.6], fov: 45, near: 0.1, far: 500 };
 const GL = { antialias: false, alpha: false, stencil: false, powerPreference: 'high-performance' };
 
 function handleCreated({ gl, invalidate }) {

@@ -15,7 +15,9 @@ export const SCENE = {
   hemisphereIntensity: 0.9,
 
   /** World-space centre of the Log Pose globe (it hovers above the sea). */
-  logPoseHeight: 3,
+  logPoseHeight: 4,
+  /** Uniform scale of the Log Pose assembly — it is the hero of the frame. */
+  logPoseScale: 1.45,
 
   /** Manga ink colour used by every outline. */
   inkColor: '#050505',

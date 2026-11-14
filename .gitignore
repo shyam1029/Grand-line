@@ -8,3 +8,10 @@ dist/
 npm-debug.log*
 .vscode/
 .idea/
+
+# Local browser-testing artefacts
+.playwright-mcp/
+.parallax/
+*.jpg
+*.png
+!public/**

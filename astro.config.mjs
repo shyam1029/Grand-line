@@ -12,6 +12,8 @@ export default defineConfig({
     mdx(),
   ],
   output: 'static',
+  // The dev toolbar overlaps the HUD and intercepts pointer events over the scene.
+  devToolbar: { enabled: false },
   build: {
     inlineStylesheets: 'auto',
   },
